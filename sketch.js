@@ -136,6 +136,14 @@ function newGame() {
     dom.tutorial.style('visibility: hidden');
 }
 
+function mouseClicked() {
+    game.mouseClicked = true;
+}
+
+function mouseDragged() {
+    game.mouseDragged = true;
+}
+
 function keyPressed() {
     if (keyCode == 13) {
         //Enter key is pressed

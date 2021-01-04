@@ -100,6 +100,8 @@ class Game {
         this.playFallSound = false;
         this.playMoveSound = false;
         this.playTritrisSound = false;
+
+        this.mouseClicked = false;
     }
 
     update() {
@@ -212,7 +214,10 @@ class Game {
 
             const zPressed = keyIsDown(90) && (!this.zWasPressed || this.zCharged);
             const xPressed = keyIsDown(88) && (!this.xWasPressed || this.xCharged);
-            const rotation = (zPressed ? -1 : 0) + (xPressed ? 1 : 0);
+            const rotation = this.mouseClicked && !this.mouseDragged? 1 : ((zPressed ? -1 : 0) + (xPressed ? 1 : 0));
+
+            this.mouseClicked = false;
+            this.mouseDragged = false;
 
             let pieceSpeed = this.pieceSpeed;
             if (keyIsDown(DOWN_ARROW)) {
