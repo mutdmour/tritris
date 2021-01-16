@@ -101,6 +101,9 @@ class Game {
         this.playMoveSound = false;
         this.playTritrisSound = false;
 
+        this.wasDraggedX = false;
+        this.draggedX = 0;
+        this.draggedY = 0;
         this.mouseClicked = false;
     }
 
@@ -187,16 +190,21 @@ class Game {
         }
 
         if (this.currentPiece !== null) {
+            const isDraggedHoriz = this.draggedX !== 0;
+            const isDraggedDown = this.draggedY > 0 && !isDraggedHoriz;
+            const isMouseClicked = this.mouseClicked && !this.wasDraggedX;
+
             //If either left is pressed or right is pressed and down isn't
             const oneKeyPressed =
                 keyIsDown(LEFT_ARROW) != keyIsDown(RIGHT_ARROW) &&
                 !keyIsDown(DOWN_ARROW);
             let move = false;
-            if (oneKeyPressed) {
+            if (oneKeyPressed || isDraggedHoriz) {
                 this.das += deltaTime;
                 if (
                     (keyIsDown(LEFT_ARROW) && !this.leftWasPressed) ||
-                    (keyIsDown(RIGHT_ARROW) && !this.rightWasPressed)
+                    (keyIsDown(RIGHT_ARROW) && !this.rightWasPressed) ||
+                    (this.draggedX === 0 && !this.wasDraggedX)
                 ) {
                     //If it was tapped, move and reset das
                     move = true;
@@ -206,25 +214,23 @@ class Game {
                     this.das = this.dasCharged;
                 }
             }
+
             let horzDirection = 0;
             if (move) {
-                if (keyIsDown(LEFT_ARROW)) horzDirection = -1;
-                if (keyIsDown(RIGHT_ARROW)) horzDirection = 1;
+                if (keyIsDown(LEFT_ARROW) || this.draggedX < 0) horzDirection = -1;
+                if (keyIsDown(RIGHT_ARROW) || this.draggedX > 0) horzDirection = 1;
             }
 
             const zPressed = keyIsDown(90) && (!this.zWasPressed || this.zCharged);
             const xPressed = keyIsDown(88) && (!this.xWasPressed || this.xCharged);
-            const rotation = this.mouseClicked && !this.mouseDragged? 1 : ((zPressed ? -1 : 0) + (xPressed ? 1 : 0));
-
-            this.mouseClicked = false;
-            this.mouseDragged = false;
+            const rotation = isMouseClicked? 1 : ((zPressed ? -1 : 0) + (xPressed ? 1 : 0));
 
             let pieceSpeed = this.pieceSpeed;
-            if (keyIsDown(DOWN_ARROW)) {
+            if (keyIsDown(DOWN_ARROW) || isDraggedDown) {
                 //Pressing down moves twice as fast, or as fast as the min
                 pieceSpeed = min(pieceSpeed, this.softDropSpeed);
             }
-            if (keyIsDown(DOWN_ARROW) && !this.downWasPressed) {
+            if (isDraggedDown || (keyIsDown(DOWN_ARROW) && !this.downWasPressed)) {
                 this.downPressedAt = this.currentPiece.pos.y; //Save when the piece was first pressed down
             }
             const moveDown = Date.now() >= this.lastMoveDown + pieceSpeed;
@@ -261,6 +267,11 @@ class Game {
         if (!keyIsDown(90)) this.zCharged = false; //If the player is pressing anymore, they no longer want to rotate, so don't charge
         if (!keyIsDown(88)) this.xCharged = false;
         this.lastFrame = Date.now();
+
+        this.wasDraggedX = this.draggedX !== 0;
+        this.draggedX = 0;
+        this.draggedY = 0;
+        this.mouseClicked = false;
     }
 
     placePiece() {

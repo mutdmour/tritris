@@ -140,8 +140,9 @@ function mouseClicked() {
     game.mouseClicked = true;
 }
 
-function mouseDragged() {
-    game.mouseDragged = true;
+function mouseDragged(event) {
+    game.draggedX = event.movementX;
+    game.draggedY = event.movementY;
 }
 
 function keyPressed() {
